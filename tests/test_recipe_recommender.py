@@ -6,8 +6,22 @@ from modules.recipe_recommender import *
 
 
 class TestSearchRecipes(unittest.TestCase):
-    # test if recipes returned meet the nutritional requirements
+    """
+    This Class is used to test the Recipes returned from search_recipes
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(TestSearchRecipes, self).__init__(*args, **kwargs)
+        self.rr = RecipeRecommender()
+        self.payload = {}
+        self.headers = {
+            'Cookie': '__cfduid=d443da310537f29e03b78e744720641111613622052'
+        }
+
     def test_nutrition_requirements(self):
+        """
+        Test if Recipes returned meet the nutritional requirements
+        """
         nutrients = {
             'minCarbs': 1,
             'maxCarbs': 100,
@@ -18,20 +32,16 @@ class TestSearchRecipes(unittest.TestCase):
             'minFat': 1,
             'maxFat': 100
         }
-        rr = RecipeRecommender()
-        recipes = rr.search_recipes(nutritional_req=nutrients)
 
-        payload = {}
-        headers = {
-            'Cookie': '__cfduid=d443da310537f29e03b78e744720641111613622052'
-        }
+        recipes = self.rr.search_recipes(nutritional_req=nutrients)
+
         slicer = slice(0, -1, 1)
         for recipe in recipes:
             get_nutrition_url = "https://api.spoonacular.com/recipes/{id}/nutritionWidget.json?{apikey}".format(
-                id=recipe.recipe_id, apikey=apikey1)
+                id=recipe.recipe_id, apikey=apikey7)
 
             response = requests.request(
-                "GET", get_nutrition_url, headers=headers, data=payload)
+                "GET", get_nutrition_url, headers=self.headers, data=self.payload)
             results = response.json()
 
             recipeCalories = int(results["calories"])
@@ -57,11 +67,12 @@ class TestSearchRecipes(unittest.TestCase):
             self.assertLessEqual(
                 nutrients["minFat"], recipeFat, "Recipe fat < minFat")
 
-    # test if recipes returned include at least one of the input ingredients
     def test_ingredient_requirements(self):
+        """
+        Test if Recipes returned includes at least one of the input ingredients
+        """
         ingredients = ["chicken", "potato"]
-        rr = RecipeRecommender()
-        recipes = rr.search_recipes(ingredients=ingredients)
+        recipes = self.rr.search_recipes(ingredients=ingredients)
         # print(recipes)
         contains_ingredient = False
         for recipe in recipes:
@@ -75,98 +86,76 @@ class TestSearchRecipes(unittest.TestCase):
         self.assertTrue(
             contains_ingredient, "recipes do not contain at least one provided ingredient")
 
-    # test if the recipes returned meet diet requirements
     def test_diet_requirements(self):
+        """
+        Test if the recipes returned meet diet requirements
+        """
         diets = ["glutenFree", "vegetarian", "vegan"]
 
-        payload = {}
-        headers = {
-            'Cookie': '__cfduid=d443da310537f29e03b78e744720641111613622052'
-        }
-        rr = RecipeRecommender()
-        for diet in diets:
-            # print(diet)
-            recipes = rr.search_recipes(diet=diet)
-            for recipe in recipes:
-                get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                    id=recipe.recipe_id, apikey=apikey1)
-                response = requests.request(
-                    "GET", get_recipe_info_url, headers=headers, data=payload)
-                results = response.json()
-                # print(results)
-                self.assertTrue(
-                    results[diet], "recipes are not {diet}".format(diet=diet))
-
         # test gluten-free
-        rr_gf = RecipeRecommender()
-        recipes_gf = rr_gf.search_recipes(diet=diets[0])
+        recipes_gf = self.rr.search_recipes(diet=diets[0])
 
         for recipe in recipes_gf:
             get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                id=recipe.recipe_id, apikey=apikey1)
+                id=recipe.recipe_id, apikey=apikey7)
 
             response = requests.request(
-                "GET", get_recipe_info_url, headers=headers, data=payload)
+                "GET", get_recipe_info_url, headers=self.headers, data=self.payload)
             results = response.json()
             self.assertTrue(results["glutenFree"],
                             "recipes are not gluten free")
 
         # test vegetarian
-        rr_veg = RecipeRecommender()
-        recipes_veg = rr_veg.search_recipes(diet=diets[1])
+        recipes_veg = self.rr.search_recipes(diet=diets[1])
 
         for recipe in recipes_veg:
             get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                id=recipe.recipe_id, apikey=apikey1)
+                id=recipe.recipe_id, apikey=apikey7)
 
             response = requests.request(
-                "GET", get_recipe_info_url, headers=headers, data=payload)
+                "GET", get_recipe_info_url, headers=self.headers, data=self.payload)
             results = response.json()
             self.assertTrue(results["vegetarian"],
                             "recipes are not vegetarian")
 
         # test vegan
-        rr_vegan = RecipeRecommender()
-        recipes_vegan = rr_vegan.search_recipes(diet=diets[2])
+        recipes_vegan = self.rr.search_recipes(diet=diets[2])
 
         for recipe in recipes_vegan:
             get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                id=recipe.recipe_id, apikey=apikey1)
+                id=recipe.recipe_id, apikey=apikey7)
 
             response = requests.request(
-                "GET", get_recipe_info_url, headers=headers, data=payload)
+                "GET", get_recipe_info_url, headers=self.headers, data=self.payload)
             results = response.json()
             # print(results)
             self.assertTrue(results["vegan"], "recipes are not vegan")
 
-    # test if the recipes returned meet intolerance requirements
     def test_intolerances_requirements(self):
+        """
+        Test if the Recipes returned meet intolerance requirements
+        """
         intolerances = ["dairy", "gluten"]
-        payload = {}
-        headers = {
-            'Cookie': '__cfduid=d443da310537f29e03b78e744720641111613622052'
-        }
-        rr = RecipeRecommender()
         for intolerance in intolerances:
-            # print(diet)
-            recipes = rr.search_recipes(intolerances=intolerance)
+            # print(intolerance)
+            recipes = self.rr.search_recipes(intolerances=intolerance)
             for recipe in recipes:
                 get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                    id=recipe.recipe_id, apikey=apikey1)
+                    id=recipe.recipe_id, apikey=apikey7)
                 response = requests.request(
-                    "GET", get_recipe_info_url, headers=headers, data=payload)
+                    "GET", get_recipe_info_url, headers=self.headers, data=self.payload)
                 results = response.json()
                 # print(results)
                 self.assertTrue(
                     results[intolerance+"Free"], "recipes are not {intolerance}Free".format(intolerance=intolerance))
 
         intolerances = ["gluten", "dairy"]
-        recipes = rr.search_recipes(intolerances=intolerances)
+        recipes = self.rr.search_recipes(intolerances=intolerances)
         for recipe in recipes:
             get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                id=recipe.recipe_id, apikey=apikey1)
+                id=recipe.recipe_id, apikey=apikey7)
             response = requests.request(
-                "GET", get_recipe_info_url, headers=headers, data=payload)
+                "GET", get_recipe_info_url, headers=self.headers, data=self.payload)
             results = response.json()
             # print(results)
             for intolerance in intolerances:
@@ -175,8 +164,14 @@ class TestSearchRecipes(unittest.TestCase):
 
 
 class TestRecipeToIngredients(unittest.TestCase):
-    # test if recipe is valid/raises appropriate exception with recipe_id is not valid
+    """
+    This class is used to test the recipe_to_ingredients function raises proper expceptions
+    """
+
     def test_invalid_recipe_id(self):
+        """
+            Test if invalidRecipeID is raised for invalid recipeID input
+        """
         try:
             RecipeRecommender.recipe_to_ingredients("invalid_recipe_id")
         except InvalidRecipeID:
@@ -184,8 +179,10 @@ class TestRecipeToIngredients(unittest.TestCase):
         except:
             self.fail("InvalidRecipeID exception was not thrown")
 
-    # # test is apikey is out of points for the day
     # def test_apikey_out_of_points(self):
+    #     """
+    #         Test if ApikeyOutOfPoints is raised when apikey is out of points
+    #     """
     #     try:
     #         RecipeRecommender.recipe_to_ingredients(641072)
     #     except ApikeyOutOfPoints:
@@ -195,8 +192,14 @@ class TestRecipeToIngredients(unittest.TestCase):
 
 
 class TestGetRecipeInfo(unittest.TestCase):
-    # test if recipe is valid/raises appropriate exception with recipe_id is not valid
+    """
+    This class is used to test the get_recipe_info function raises proper expceptions
+    """
+
     def test_invalid_recipe_id(self):
+        """
+            Test if invalidRecipeID is raised for invalid recipeID input
+        """
         try:
             RecipeRecommender.get_recipe_info("invalid_recipe_id")
         except InvalidRecipeID:
@@ -204,8 +207,10 @@ class TestGetRecipeInfo(unittest.TestCase):
         except:
             self.fail("InvalidRecipeID exception was not thrown")
 
-    # # test is apikey is out of points for the day
     # def test_apikey_out_of_points(self):
+    #     """
+    #         Test if ApikeyOutOfPoints is raised when apikey is out of points
+    #     """
     #     try:
     #         RecipeRecommender.get_recipe_info(641072)
     #     except ApikeyOutOfPoints:

@@ -2,59 +2,71 @@ import requests
 import pandas as pd
 from .constants import *
 
+###########################################################################
+# The RecipeRecommender class allows the user to interact with the
+# Spoonacular API and get recipes that meet the given requirements.
+###########################################################################
+
 
 class RecipeRecommender:
     def search_recipes(self, ingredients: list = [], nutritional_req: dict = {}, diet: str = "", intolerances: list = []):
-        search_recipes_url = "https://api.spoonacular.com/recipes/complexSearch"
-        result_option_url = 'instructionsRequired=true&ignorePantry=true&sort={sort}&number={num_results}&limitLicense=true'.format(
-            sort="min-missing-ingredients",
-            num_results=3)
-        preferences_url = 'diet={diet}&intolerances={intolerances}'.format(
-            diet=diet, intolerances=','.join(intolerances))
-        ingredients_url = 'includeIngredients=' + ','.join(ingredients)
-        nutr_url = '&'.join("{!s}={!r}".format(key, val)
-                            for (key, val) in nutritional_req.items())
+        """
+        Call Spoonacular API with given inputs and finds recipes that meet the requirements.
 
-        search_url = "{search}?{apikey}&{result_options}&{ingredients}&{nutrition}&{preferences}".format(
-            search=search_recipes_url,
-            apikey=apikey1,
-            result_options=result_option_url,
-            ingredients=ingredients_url,
-            nutrition=nutr_url,
-            preferences=preferences_url)
+        param: self, ingredients, nutritional_req, diet, intolerances
+
+        return: list[Recipe]
+        """
+        recipes = []
 
         payload = {}
         headers = {
             'Cookie': '__cfduid=d443da310537f29e03b78e744720641111613622052'
         }
 
-        recipes = []
-
+        # builds url and calls Spoonacular API to search for recipes with the given input requirements
+        search_recipes_url = "https://api.spoonacular.com/recipes/complexSearch"
+        result_option_url = 'instructionsRequired=true&ignorePantry=true&sort={sort}&number={num_results}&limitLicense=true'.format(
+            sort="min-missing-ingredients",
+            num_results=2)
+        preferences_url = 'diet={diet}&intolerances={intolerances}'.format(
+            diet=diet, intolerances=','.join(intolerances))
+        ingredients_url = 'includeIngredients=' + ','.join(ingredients)
+        nutr_url = '&'.join("{!s}={!r}".format(key, val)
+                            for (key, val) in nutritional_req.items())
+        search_url = "{search}?{apikey}&{result_options}&{ingredients}&{nutrition}&{preferences}".format(
+            search=search_recipes_url,
+            apikey=apikey5,
+            result_options=result_option_url,
+            ingredients=ingredients_url,
+            nutrition=nutr_url,
+            preferences=preferences_url)
         search_response = requests.request(
             "GET", search_url, headers=headers, data=payload)
-        # print(search_response.json())
+
         check_api_errors(search_response)
+
         search_results = pd.DataFrame(search_response.json()["results"])
 
         if not search_results.empty:
             search_results = search_results[["id", "image", "title"]]
-            # print(search_results)
+
+            # builds url and calls Spoonacular to retrieve recipe source url
             get_bulk_recipe_info_url = 'https://api.spoonacular.com/recipes/informationBulk'
             recipe_id_url = 'ids=' + ','.join(str(id)
                                               for id in list(search_results["id"]))
             recipe_info_url = "{get_recipe}?{apikey}&{recipe_ids}".format(
                 get_recipe=get_bulk_recipe_info_url,
-                apikey=apikey1,
+                apikey=apikey5,
                 recipe_ids=recipe_id_url)
-
             source_response = requests.request(
                 "GET", recipe_info_url, headers=headers, data=payload)
             source_results = pd.DataFrame(source_response.json())[
                 ["id", "sourceUrl"]]
-
             results = search_results.join(source_results.set_index(
                 "id"), on="id", how='left', rsuffix='right')[["id", "title", "sourceUrl", "image"]]
-            # print(results)
+
+            # builds list[Recipe] for the output
             for index, recipe in results.iterrows():
                 recipes.append(Recipe(
                     recipe["id"],
@@ -68,41 +80,53 @@ class RecipeRecommender:
 
     @staticmethod
     def recipe_to_ingredients(recipe_id):
-        request_url = 'https://api.spoonacular.com/recipes/{}/ingredientWidget.json?'.format(
-            recipe_id)
+        """
+        Call Spoonacular API to retrieve ingredients required for the given recipe ID.
 
+        param: recipe_id
+
+        return: list[Ingredient]
+        """
         ingredients = []
 
-        url = request_url + apikey1
+        # calls Spoonacular to pull ingredients for given recipe ID
+        request_url = 'https://api.spoonacular.com/recipes/{}/ingredientWidget.json?'.format(
+            recipe_id)
+        url = request_url + apikey5
         payload = {}
         headers = {
             'Cookie': '__cfduid=dff952ebbf9c020c4f07c314e6bcb9c711613423774'
         }
-
         response = requests.request("GET", url, headers=headers, data=payload)
 
         check_api_errors(response)
 
         results = pd.json_normalize(response.json()["ingredients"])
 
+        # builds list[Ingredient] for the output
         for index, ingredient in results.iterrows():
             ingredients.append(Ingredient(ingredient_full=str(ingredient['amount.metric.value']) + " " + ingredient["amount.metric.unit"] + " " +
                                           ingredient["name"], ingredient_name=ingredient["name"], amount=ingredient["amount.metric.value"], units=ingredient["amount.metric.unit"]))
 
         return ingredients
-        # return list of Ingredient
 
     @staticmethod
     def get_recipe_info(recipe_id):
+        """
+        Call Spoonacular API to retrieve instructions to make recipe.
+
+        param: recipe_id
+
+        return: json
+        """
+        # calls Spoonacular to pull recipe directions
         request_url = 'https://api.spoonacular.com/recipes/{}/analyzedInstructions?'.format(
             recipe_id)
-
-        url = request_url + apikey1
+        url = request_url + apikey5
         payload = {}
         headers = {
             'Cookie': '__cfduid=dff952ebbf9c020c4f07c314e6bcb9c711613423774'
         }
-
         response = requests.request("GET", url, headers=headers, data=payload)
 
         check_api_errors(response)
