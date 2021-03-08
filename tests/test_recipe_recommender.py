@@ -28,7 +28,7 @@ class TestSearchRecipes(unittest.TestCase):
         slicer = slice(0, -1, 1)
         for recipe in recipes:
             get_nutrition_url = "https://api.spoonacular.com/recipes/{id}/nutritionWidget.json?{apikey}".format(
-                id=recipe.recipe_id, apikey=apikey3)
+                id=recipe.recipe_id, apikey=apikey1)
 
             response = requests.request(
                 "GET", get_nutrition_url, headers=headers, data=payload)
@@ -89,7 +89,7 @@ class TestSearchRecipes(unittest.TestCase):
             recipes = rr.search_recipes(diet=diet)
             for recipe in recipes:
                 get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                    id=recipe.recipe_id, apikey=apikey3)
+                    id=recipe.recipe_id, apikey=apikey1)
                 response = requests.request(
                     "GET", get_recipe_info_url, headers=headers, data=payload)
                 results = response.json()
@@ -103,7 +103,7 @@ class TestSearchRecipes(unittest.TestCase):
 
         for recipe in recipes_gf:
             get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                id=recipe.recipe_id, apikey=apikey3)
+                id=recipe.recipe_id, apikey=apikey1)
 
             response = requests.request(
                 "GET", get_recipe_info_url, headers=headers, data=payload)
@@ -117,7 +117,7 @@ class TestSearchRecipes(unittest.TestCase):
 
         for recipe in recipes_veg:
             get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                id=recipe.recipe_id, apikey=apikey3)
+                id=recipe.recipe_id, apikey=apikey1)
 
             response = requests.request(
                 "GET", get_recipe_info_url, headers=headers, data=payload)
@@ -131,7 +131,7 @@ class TestSearchRecipes(unittest.TestCase):
 
         for recipe in recipes_vegan:
             get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                id=recipe.recipe_id, apikey=apikey3)
+                id=recipe.recipe_id, apikey=apikey1)
 
             response = requests.request(
                 "GET", get_recipe_info_url, headers=headers, data=payload)
@@ -152,7 +152,7 @@ class TestSearchRecipes(unittest.TestCase):
             recipes = rr.search_recipes(intolerances=intolerance)
             for recipe in recipes:
                 get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                    id=recipe.recipe_id, apikey=apikey3)
+                    id=recipe.recipe_id, apikey=apikey1)
                 response = requests.request(
                     "GET", get_recipe_info_url, headers=headers, data=payload)
                 results = response.json()
@@ -164,7 +164,7 @@ class TestSearchRecipes(unittest.TestCase):
         recipes = rr.search_recipes(intolerances=intolerances)
         for recipe in recipes:
             get_recipe_info_url = "https://api.spoonacular.com/recipes/{id}/information?{apikey}".format(
-                id=recipe.recipe_id, apikey=apikey3)
+                id=recipe.recipe_id, apikey=apikey1)
             response = requests.request(
                 "GET", get_recipe_info_url, headers=headers, data=payload)
             results = response.json()

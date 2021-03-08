@@ -1,15 +1,6 @@
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
-# class Recipe:
-#     def __init__(self, recipe_id=None, recipe_name=None, source_url=None, img_url=None, description=None, ingredients=None):
-#         self.recipe_id = recipe_id
-#         self.recipe_name = recipe_name
-#         self.source_url = source_url
-#         self.img_url = img_url
-#         self.description = description
-#         self.ingredients = ingredients  # list
-
 
 # AVAILABLE API KEYS
 apikey1 = 'apiKey=4078ba908cf14212b9c3754a84a262f5'
@@ -94,18 +85,6 @@ class Preferences:
         self.intolerances = intolerances
         self.diet = diet
         self.calories_per_day = calories_per_day
-
-
-'''
-class IngredientRR:
-    def __init__(self, ingredient: str, amount: int, unit: str):
-        self.ingredient = ingredient
-        self.amount = amount
-        self.unit = unit
-
-    def __str__(self):
-        return "ingredients: {ingredients} \n amount: {amount} {unit} \n".format(ingredients=self.ingredient, amount=self.amount, unit=self.unit)
-'''
 
 
 class Ingredient:
