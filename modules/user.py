@@ -28,19 +28,22 @@ class User:
         conn = get_postgresql_connection()
         cur = conn.cursor()
         command = "select * from Users where user_id = '{}'".format(username)
-        # command = "select * from Users"
         cur.execute(command)
         row = cur.fetchone()
         cur.close()
         conn.close()
 
-        new_user = User(name=row[1], email=row[0], height=row[3], weight=row[4], age=row[5], gender=row[6])
+        if row is None:
+            raise Exception("User is not registered")
+        new_user = User(name=row[1], email=row[0], height=row[3],
+                        weight=row[4], age=row[5], gender=row[6])
         return new_user
 
     @staticmethod
     def authenticate_user(username, password):
         try:
-            auth.sign_in_with_email_and_password(username, password)  # Log the user in
+            auth.sign_in_with_email_and_password(
+                username, password)  # Log the user in
         except:
             return False
         return True
@@ -63,7 +66,3 @@ class User:
             return True
         except:
             return False
-
-
-
-

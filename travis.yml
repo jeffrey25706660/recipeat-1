@@ -1,0 +1,8 @@
+os:
+  - linux
+  - windows
+
+language: python
+
+script:
+  - python -m unittest -v
