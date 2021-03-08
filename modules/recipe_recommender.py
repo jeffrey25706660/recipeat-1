@@ -6,7 +6,9 @@ from .constants import *
 class RecipeRecommender:
     def search_recipes(self, ingredients: list = [], nutritional_req: dict = {}, diet: str = "", intolerances: list = []):
         search_recipes_url = "https://api.spoonacular.com/recipes/complexSearch"
-        result_option_url = 'instructionsRequired=true&ignorePantry=true&sort=min-missing-ingredients&number=1&limitLicense=true'
+        result_option_url = 'instructionsRequired=true&ignorePantry=true&sort={sort}&number={num_results}&limitLicense=true'.format(
+            sort="min-missing-ingredients",
+            num_results=3)
         preferences_url = 'diet={diet}&intolerances={intolerances}'.format(
             diet=diet, intolerances=','.join(intolerances))
         ingredients_url = 'includeIngredients=' + ','.join(ingredients)
